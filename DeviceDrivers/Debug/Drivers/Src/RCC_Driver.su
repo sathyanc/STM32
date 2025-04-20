@@ -1,0 +1,2 @@
+../Drivers/Src/RCC_Driver.c:4:6:RCC_EnableGPIO	16	static
+../Drivers/Src/RCC_Driver.c:33:6:RCC_DisableGPIO	16	static
