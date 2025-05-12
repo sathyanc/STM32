@@ -19,12 +19,26 @@
 #include <stdint.h>
 #include "GPIO_Driver.h"
 #include "RCC_Driver.h"
+#include "SYSCONFIG_Driver.h"
+#include "EXTI_Driver.h"
+#include "NVIC_Driver.h"
+
 
 GPIO_PINCONFIG_T RedLed =
 {
 		.pin = 14,
 		.mode= GPIO_MODE_OUTPUT,
 		.otype=GPIO_OTYPE_PP,
+		.speed=GPIO_SPEED_LOW,
+		.pupdr=GPIO_NO_PULL,
+		.alternatefunc=0
+};
+
+GPIO_PINCONFIG_T PushButton =
+{
+		.pin = 0,
+		.mode= GPIO_MODE_INPUT,
+		.otype=GPIO_OTYPE_OD,
 		.speed=GPIO_SPEED_LOW,
 		.pupdr=GPIO_NO_PULL,
 		.alternatefunc=0
@@ -37,11 +51,35 @@ void delay(void)
 
 int main(void)
 {
+	/*Enable Push Button Port Clock - Port A*/
+	RCC_EnableGPIO(GPIOA);
+
+	/*Enable LED Port Clock - Port D*/
 	RCC_EnableGPIO(GPIOD);
+
+	/*Initialize LED Pin*/
 	GPIO_Init(GPIOD, &RedLed);
-	while(1)
+
+	/*Initialize PushButton Pin*/
+	GPIO_Init(GPIOA, &PushButton);
+
+	/*Set the EXTI0 to PA0 through SYSCFG*/
+	SYSCFG_SetEXTISource(0,0);
+
+	/*Enable EXTI Line Interrupt*/
+	EXTI_EnableInterrupt(0, EXTI_TRIGGER_RISING);
+
+	/*Enable NVIC Interrupt for EXTI0*/
+	NVIC_EnableIRQ(EXTI0_IRQn);
+
+}
+
+
+void EXTI0_IRQHandler()
+{
+	if(EXTI_IsPending(0) == 1)
 	{
 		GPIO_TogglePin(GPIOD, 14);
-		delay();
+		EXTI_ClearPending(0);
 	}
 }
