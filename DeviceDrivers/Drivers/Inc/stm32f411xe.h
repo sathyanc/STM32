@@ -106,8 +106,59 @@ typedef struct
 #define GPIO_AFR_MAXSIZE   		0xf
 #define GPIO_AFR_SHIFT_BITS 	0x4
 
+/*EXTI Register Stuct*/
+typedef struct
+{
+	volatile uint32_t IMR;		/*Interrupt Mask Register*/
+	volatile uint32_t EMR;		/*Event Mask Register*/
+	volatile uint32_t RTSR;		/*Rising Trigger Selection Register*/
+	volatile uint32_t FTSR;		/*Falling Trigger Selection Register*/
+	volatile uint32_t SWIER;	/*Software Interrupt Event Register*/
+	volatile uint32_t PR;		/*Pending Register*/
+}EXTI_RegDef;
+
+/*Macros related to EXTI Peripherals */
+#define  EXTI_BASEADDR			0x40013C00U
+#define  EXTI 					((EXTI_RegDef*)EXTI_BASEADDR)
+
+/*EXTI Interrupt number*/
+#define EXTI0_IRQn			6
+#define EXTI1_IRQn			7
+#define EXTI2_IRQn			8
+#define EXTI3_IRQn			9
+#define EXTI4_IRQn			10
+#define EXTI9_5IRQn			23
+#define EXTI15_10     	    40
+
 
 /*RCC Pointer to Struct Macro*/
 #define RCC      ((RCC_RegDef*)RCC_BASEADDR)
+
+
+/*SYSCONFIG Related Macros*/
+typedef struct
+{
+	volatile uint32_t MEMRMP;      // Memory Remap Register
+	volatile uint32_t PMC;		   // Peripheral Mode Config Register
+	volatile uint32_t EXTICR[4];   // External Interrupt Config Register
+	volatile uint32_t RESERVED[2]; // Reserved Registers
+	volatile uint32_t CMPCR; 	   // Compensation Cell Control Register
+}SYSCFG_RegDef;
+
+
+#define SYSCFG_BASE_ADDR   		0x40013800U
+
+/*SYSCFG Pointer to Struct Macro */
+#define SYSCFG					((SYSCFG_RegDef*)SYSCFG_BASE_ADDR)
+
+/*NVIC Related Macros*/
+#define NVIC_BASE_ADDR			 0xE000E100U
+
+#define NVIC_ISERx_BASE			 ((volatile uint32_t*)NVIC_BASE_ADDR)
+#define NVIC_ICERx_BASE          ((volatile uint32_t*)0xE000E180U)
+#define NVIC_ISPRx_BASE          ((volatile uint32_t*)0xE000E200U)
+#define NVIC_ICPRx_BASE          ((volatile uint32_t*)0xE000E280U)
+#define NVIC_IABRx_BASE          ((volatile uint32_t*)0xE000E300U)
+#define NVIC_IPRx_BASE		     ((volatile uint8_t*)0xE000E400U)
 
 #endif
