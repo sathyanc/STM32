@@ -57,3 +57,20 @@ void RCC_DisableGPIO(GPIO_RegDef *port)
 		RCC->AHB1ENR &= ~( 1 << 7);
 	}
 }
+
+void RCC_Config_HSE_SystemClock(void)
+{
+	//Enable HSE Clock
+	RCC->CR |= ( 1 << 16);
+
+	//wait until HSE is ready
+	while(!(RCC->CR & (1<<17)));
+
+	//Select HSE as System Clock
+	RCC->CFGR &= ~(0b11 << 0);
+	RCC->CFGR |= (0b01 << 0);
+
+	//wait until System Clock is set to HSE
+	while(!(RCC->CFGR & (0b01 << 2)));
+}
+

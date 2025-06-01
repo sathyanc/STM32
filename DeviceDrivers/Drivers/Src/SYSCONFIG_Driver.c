@@ -21,5 +21,5 @@ void SYSCFG_SetEXTISource(uint8_t EXTILine, uint8_t EXTILineVal)
 	SYSCFG->EXTICR[regIndex] &= ~(0xF << bitPos);
 
 	/*Set the relvant bits*/
-	SYSCFG->EXTICR[regIndex] |= (EXTILineVal & 0x0F) << bitPos;
+ 	SYSCFG->EXTICR[regIndex] |= (EXTILineVal & 0x0F) << bitPos;
 }

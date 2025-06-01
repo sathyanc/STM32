@@ -22,12 +22,12 @@ void GPIO_Init(GPIO_RegDef *port, GPIO_PINCONFIG_T *pinConfig)
 	{
 		if(pin < GPIO_AFR_SIZE)
 		{
-			port->AFRL &= (GPIO_AFR_MASK << (GPIO_AFR_SHIFT_BITS*pin));
+			port->AFRL &= ~(GPIO_AFR_MASK << (GPIO_AFR_SHIFT_BITS*pin));
 			port->AFRL |= ((pinConfig->alternatefunc & GPIO_AFR_MASK) << (GPIO_AFR_SHIFT_BITS * pin));
 		}
 		else if(pin >= GPIO_AFR_SIZE || pin <=GPIO_AFR_MAXSIZE)
 		{
-			port->AFRH &= (GPIO_AFR_MASK << (GPIO_AFR_SHIFT_BITS*pin));
+			port->AFRH &= ~(GPIO_AFR_MASK << (GPIO_AFR_SHIFT_BITS*pin));
 			port->AFRH |= ((pinConfig->alternatefunc & GPIO_AFR_MASK) << (GPIO_AFR_SHIFT_BITS * pin));
 		}
 	}
