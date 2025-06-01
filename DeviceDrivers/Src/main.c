@@ -22,7 +22,7 @@
 #include "SYSCONFIG_Driver.h"
 #include "EXTI_Driver.h"
 #include "NVIC_Driver.h"
-
+#include "USART_Driver.h"
 
 GPIO_PINCONFIG_T RedLed =
 {
@@ -44,12 +44,22 @@ GPIO_PINCONFIG_T PushButton =
 		.alternatefunc=0
 };
 
+USART_Struct_T Usart2Struct =
+{
+		.baudrate = 9600,
+		.oversampling = 8,
+		.parity = USART_PARITY_NONE,
+		.stopBits = USART_STOPBITS_1,
+		.usartID = USART2_ID,
+		.wordLength = USART_WORDLENGTH_8B
+};
+
 void delay(void)
 {
 	for(uint32_t i=0; i< 1777777; i++);
 }
 
-int main(void)
+void Part15_InterruptDemo()
 {
 	/*Enable Push Button Port Clock - Port A*/
 	RCC_EnableGPIO(GPIOA);
@@ -71,8 +81,30 @@ int main(void)
 
 	/*Enable NVIC Interrupt for EXTI0*/
 	NVIC_EnableIRQ(EXTI0_IRQn);
-
 }
+
+uint8_t RxBuff[10];
+int main(void)
+{
+	/*Uncomment to execute Interrupt Demo*/
+	//Part15_InterruptDemo();
+
+	const char *message = "Hello from USART2!\n";
+	//Enable FPU
+	SCB_CPACR_ADDR |= (0xF << 20);
+
+	//Enable the HSE Clock (8MHz) and configure the USART Peripheral Clock (APB Clock) also to 8MHz
+	RCC_Config_HSE_SystemClock();
+
+	USART_Init(&Usart2Struct);
+	USART_Transmit(USART2_ID, (uint8_t*)message, 19);
+	while(1)
+	{
+		USART_Receive(USART2_ID, (uint8_t*)RxBuff, 1);
+		USART_Transmit(USART2_ID, (uint8_t*)RxBuff, 1);
+	}
+}
+
 
 
 void EXTI0_IRQHandler()
