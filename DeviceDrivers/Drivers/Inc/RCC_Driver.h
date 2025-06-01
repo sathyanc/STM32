@@ -5,5 +5,5 @@
 
 void RCC_EnableGPIO(GPIO_RegDef *port);
 void RCC_DisableGPIO(GPIO_RegDef *port);
-
+void RCC_Config_HSE_SystemClock(void);
 #endif

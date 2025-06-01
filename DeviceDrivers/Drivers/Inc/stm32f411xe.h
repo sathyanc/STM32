@@ -161,4 +161,52 @@ typedef struct
 #define NVIC_IABRx_BASE          ((volatile uint32_t*)0xE000E300U)
 #define NVIC_IPRx_BASE		     ((volatile uint8_t*)0xE000E400U)
 
+/*USART Peripheral related Macros*/
+#define USART1_BASE_ADDR		 0x40011000U
+#define USART2_BASE_ADDR		 0x40004400U
+#define USART6_BASE_ADDR 		 0x40011400U
+
+/*Register Structure for USARTx*/
+typedef struct
+{
+	volatile uint32_t SR;
+	volatile uint32_t DR;
+	volatile uint32_t BRR;
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t CR3;
+	volatile uint32_t GTPR;
+}USART_RegDef_T;
+
+/*Pointers to Register Struct for all USART Peripheral*/
+#define USART1 		((USART_RegDef_T*)USART1_BASE_ADDR)
+#define USART2 		((USART_RegDef_T*)USART2_BASE_ADDR)
+#define USART6		((USART_RegDef_T*)USART6_BASE_ADDR)
+
+/*USARTx Status Register related Macros*/
+#define USARTx_SR_TXE	(1 << 7)
+#define USARTx_SR_TC	(1 << 6)
+#define USARTx_SR_RXNE  (1 << 5)
+
+/*USARTx CR1 Register related Macros*/
+#define USARTx_CR1_OVER8  (1 << 15)
+#define USARTx_CR1_UE	  (1 << 13)
+#define USARTx_CR1_TXEIE  (1 << 7)
+#define USARTx_CR1_TCIE   (1 << 6)
+#define USARTx_CR1RXNEIE  (1 << 5)
+#define USARTx_CR1_TE	  (1 << 3)
+#define USARTx_CR1_RE	  (1 << 2)
+
+/*USARTx CR2 Register related macros*/
+#define USARTx_CR2_STOPBIT1   (0b00 << 12)
+#define USARTx_CR2_STOPBIT0_5 (0b01 << 12)
+#define USARTx_CR2_STOPBIT1_5 (0b11 << 12)
+#define USARTx_CR2_STOPBIT2   (0b10 << 12)
+
+/*USARTx CR3 Register related Macros*/
+#define USARTx_CR3_ONEBIT	(1 << 11)
+
+/*SCB related macros*/
+#define SCB_CPACR_ADDR		(*(volatile uint32_t*)0xE000ED88U)
+
 #endif
