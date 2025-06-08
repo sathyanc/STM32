@@ -49,7 +49,7 @@ void USART_Init(USART_Struct_T *usartConfig)
 		if(usartConfig->parity != USART_PARITY_NONE)
 		{
 			/*Enable Parity*/
-			USART1->CR1 |= (1 < 10);
+			USART1->CR1 |= (1 << 10);
 
 			/*Set the Parity*/
 			USART1->CR1 &= ~(1 << 9);
@@ -123,7 +123,7 @@ void USART_Init(USART_Struct_T *usartConfig)
 		if(usartConfig->parity != USART_PARITY_NONE)
 		{
 			/*Enable Parity*/
-			USART2->CR1 |= (1 < 10);
+			USART2->CR1 |= (1 << 10);
 
 			/*Set the Parity*/
 			USART2->CR1 &= ~(1 << 9);
@@ -198,7 +198,7 @@ void USART_Init(USART_Struct_T *usartConfig)
 		if(usartConfig->parity != USART_PARITY_NONE)
 		{
 			/*Enable Parity*/
-			USART6->CR1 |= (1 < 10);
+			USART6->CR1 |= (1 << 10);
 
 			/*Set the Parity*/
 			USART6->CR1 &= ~(1 << 9);
