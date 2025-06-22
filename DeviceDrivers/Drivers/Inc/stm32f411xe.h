@@ -130,6 +130,10 @@ typedef struct
 #define EXTI9_5IRQn			23
 #define EXTI15_10     	    40
 
+/*IRQn for USART Peripherals*/
+#define USART1_IRQn			37
+#define USART2_IRQn			38
+#define USART6_IRQn			71
 
 /*RCC Pointer to Struct Macro*/
 #define RCC      ((RCC_RegDef*)RCC_BASEADDR)

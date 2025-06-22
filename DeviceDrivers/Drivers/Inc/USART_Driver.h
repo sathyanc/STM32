@@ -51,18 +51,35 @@ typedef struct
 	USART_EN_PARITY_T	parity;
 	USART_EN_STOPBIT_T stopBits;
 	uint8_t oversampling;
+
+	USART_RegDef_T *USARTInstance;
+
+	//Interrupt related members
+	uint8_t *pTxBuffer;
+	volatile uint8_t TxLength;
+	volatile uint8_t TxIndex;
+	volatile uint8_t TxBusy;
+
+	uint8_t *pRxBuffer;
+	volatile uint8_t RxLength;
+	volatile uint8_t RxIndex;
+	volatile uint8_t RxBusy;
+
 }USART_Struct_T;
+
 
 /*USART Function Declarations */
 void USART_Init(USART_Struct_T *usartConfig);
-void USART_DeInit(USART_EN_ID_T usartId);
-void USART_Transmit(USART_EN_ID_T usartId, uint8_t *data, uint8_t length);
-void USART_Receive(USART_EN_ID_T usartId, uint8_t *data, uint8_t length);
+void USART_DeInit(USART_Struct_T *usartConfig);
+void USART_Transmit(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length);
+void USART_Receive(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length);
 /*Support functions*/
-void USART_Enable(USART_EN_ID_T usartId);
-void USART_Disable(USART_EN_ID_T usartId);
+void USART_Enable(USART_Struct_T *usartConfig);
+void USART_Disable(USART_Struct_T *usartConfig);
 void USART_ConfigureGPIO(USART_EN_ID_T usartId);
 
-
+/*USART Interrupts related Function Declarations*/
+void USART_Transmit_IT(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length);
+void USART_Receive_IT(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length);
 
 #endif
