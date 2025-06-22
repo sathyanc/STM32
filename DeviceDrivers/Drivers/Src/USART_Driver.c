@@ -15,382 +15,216 @@ void USART_Init(USART_Struct_T *usartConfig)
 	uint8_t Over8Val;
 	float UsartDiv,fraction;
 	uint32_t Mantissa;
+	USART_RegDef_T *pUsart;
+
+	pUsart = usartConfig->USARTInstance;
 
 	/*Configure the GPIO Peripheral for the given USART peripheral*/
 	USART_ConfigureGPIO(usartConfig->usartID);
 
-	if(usartConfig->usartID == USART1_ID)
+	/*Select the USART Peripheral and Init the Clock for it*/
+	switch(usartConfig->usartID)
 	{
-		/*Enable the Peripheral Clock*/
-		RCC->APB2ENR |= ( 1 << 4);
-
-		/*Set the Word Length*/
-		if(usartConfig->wordLength == USART_WORDLENGTH_8B)
-		{
-			USART1->CR1 &= ~(1 << 12);
-		}
-		else
-		{
-			USART1->CR1 |= (1<<12); //9bits word length
-		}
-		/*Set the Stop bits*/
-		USART1->CR2 &= ~(0b11 << 12);
-		if(usartConfig->stopBits == USART_STOPBITS_0_5)
-			USART1->CR2 |=  USARTx_CR2_STOPBIT0_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_1)
-			USART1->CR2 |=  USARTx_CR2_STOPBIT1;
-		else if(usartConfig->stopBits == USART_STOPBITS_1_5)
-			USART1->CR2 |=  USARTx_CR2_STOPBIT1_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_2)
-			USART1->CR2 |=  USARTx_CR2_STOPBIT2;
-
-
-		/*Enable or Disable Parity*/
-		if(usartConfig->parity != USART_PARITY_NONE)
-		{
-			/*Enable Parity*/
-			USART1->CR1 |= (1 << 10);
-
-			/*Set the Parity*/
-			USART1->CR1 &= ~(1 << 9);
-			if(usartConfig->parity == USART_PARITY_EVEN)
-			{
-				USART1->CR1 &= ~(1 << 9);
-			}
-			else if(usartConfig->parity == USART_PARITY_ODD)/*ODD*/
-			{
-				USART1->CR1 |= (1 << 9);
-			}
-		}
-
-		/*Set Oversampling Flag OVER8*/
-		if(usartConfig->oversampling == 8)
-		{
-			USART1->CR1 |= USARTx_CR1_OVER8;
-			Over8Val =1;
-		}
-		else if(usartConfig->oversampling == 16)
-		{
-			USART1->CR1 &= ~USARTx_CR1_OVER8;
-			Over8Val =0;
-		}
-
-		/*Set the Baud rate*/
-		//USARTDIV = FClk / ( 8 x ( 2 - OVER8) x BaudRate)
-		UsartDiv = (USART_PeripheralClockFreq / (8 * (2 - Over8Val) * usartConfig->baudrate));
-		Mantissa = (uint32_t)UsartDiv;
-		fraction = UsartDiv - Mantissa;
-
-		if(Over8Val == 1)
-		{
-			USART1->BRR = (Mantissa << 4) | (uint8_t)(fraction * 8 + 0.5f);
-		}
-		else /*Oversampling by 16*/
-		{
-			USART1->BRR = (Mantissa << 4) | (uint8_t)(fraction * 16 + 0.5f);
-		}
-
-		/*Enable Transmitter/Receiver*/
-	 	/*Enable USART*/
-		USART1->CR1 |= (USARTx_CR1_TE) | (USARTx_CR1_RE) | (USARTx_CR1_UE);
+		case USART1_ID:
+			/*Enable the Peripheral Clock*/
+			RCC->APB2ENR |= ( 1 << 4);
+			break;
+		case USART2_ID:
+			/*Enable the Peripheral Clock*/
+			RCC->APB1ENR |= ( 1 << 17);
+			break;
+		case USART6_ID:
+			/*Enable the Peripheral Clock*/
+			RCC->APB2ENR |= ( 1 << 5);
+			break;
+		default:
+			return;
 	}
-	else if(usartConfig->usartID == USART2_ID)
+
+	/*Set the Word Length*/
+	if(usartConfig->wordLength == USART_WORDLENGTH_8B)
 	{
-		/*Enable the Peripheral Clock*/
-		RCC->APB1ENR |= ( 1 << 17);
-
-		/*Set the Word Length*/
-		if(usartConfig->wordLength == USART_WORDLENGTH_8B)
-		{
-			USART2->CR1 &= ~(1 << 12);
-		}
-		else
-		{
-			USART2->CR1 |= (1<<12); //9bits word length
-		}
-		/*Set the Stop bits*/
-		USART2->CR2 &= ~(0b11 << 12);
-		if(usartConfig->stopBits == USART_STOPBITS_0_5)
-			USART2->CR2 |=  USARTx_CR2_STOPBIT0_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_1)
-			USART2->CR2 |=  USARTx_CR2_STOPBIT1;
-		else if(usartConfig->stopBits == USART_STOPBITS_1_5)
-			USART2->CR2 |=  USARTx_CR2_STOPBIT1_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_2)
-			USART2->CR2 |=  USARTx_CR2_STOPBIT2;
-
-		/*Enable or Disable Parity*/
-		if(usartConfig->parity != USART_PARITY_NONE)
-		{
-			/*Enable Parity*/
-			USART2->CR1 |= (1 << 10);
-
-			/*Set the Parity*/
-			USART2->CR1 &= ~(1 << 9);
-			if(usartConfig->parity == USART_PARITY_EVEN)
-			{
-				USART2->CR1 &= ~(1 << 9);
-			}
-			else if(usartConfig->parity == USART_PARITY_ODD)/*ODD*/
-			{
-				USART2->CR1 |= (1 << 9);
-			}
-		}
-
-				/*Set Oversampling Flag OVER8*/
-		if(usartConfig->oversampling == 8)
-		{
-			USART2->CR1 |= USARTx_CR1_OVER8;
-			Over8Val =1;
-		}
-		else if(usartConfig->oversampling == 16)
-		{
-			USART2->CR1 &= ~USARTx_CR1_OVER8;
-			Over8Val =0;
-		}
-
-		/*Set the Baud rate*/
-		//USARTDIV = FClk / ( 8 x ( 2 - OVER8) x BaudRate)
-		UsartDiv = ((float)USART_PeripheralClockFreq / (float)((8 * (2 - Over8Val) * usartConfig->baudrate)));
-		Mantissa = (uint32_t)UsartDiv;
-		fraction = UsartDiv - Mantissa;
-
-		if(Over8Val == 1)
-		{
-			USART2->BRR = (Mantissa << 4) | (uint8_t)(fraction * 8 + 0.5f);
-		}
-		else /*Oversampling by 16*/
-		{
-			USART2->BRR = (Mantissa << 4) | (uint8_t)(fraction * 16 + 0.5f);
-		}
-
-		/*Enable Transmitter/Receiver*/
-	 	/*Enable USART*/
-		USART2->CR1 |= (USARTx_CR1_TE) | (USARTx_CR1_RE) | (USARTx_CR1_UE);
-	}
-	else if(usartConfig->usartID == USART6_ID)
-	{
-		/*Enable the Peripheral Clock*/
-		RCC->APB2ENR |= ( 1 << 5);
-
-		/*Set the Word Length*/
-		if(usartConfig->wordLength == USART_WORDLENGTH_8B)
-		{
-			USART6->CR1 &= ~(1 << 12);
-		}
-		else
-		{
-			USART6->CR1 |= (1<<12); //9bits word length
-		}
-		/*Set the Stop bits*/
-		USART6->CR2 &= ~(0b11 << 12);
-		if(usartConfig->stopBits == USART_STOPBITS_0_5)
-			USART6->CR2 |=  USARTx_CR2_STOPBIT0_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_1)
-			USART6->CR2 |=  USARTx_CR2_STOPBIT1;
-		else if(usartConfig->stopBits == USART_STOPBITS_1_5)
-			USART6->CR2 |=  USARTx_CR2_STOPBIT1_5;
-		else if(usartConfig->stopBits == USART_STOPBITS_2)
-			USART6->CR2 |=  USARTx_CR2_STOPBIT2;
-
-
-		/*Enable or Disable Parity*/
-		if(usartConfig->parity != USART_PARITY_NONE)
-		{
-			/*Enable Parity*/
-			USART6->CR1 |= (1 << 10);
-
-			/*Set the Parity*/
-			USART6->CR1 &= ~(1 << 9);
-			if(usartConfig->parity == USART_PARITY_EVEN)
-			{
-				USART6->CR1 &= ~(1 << 9);
-			}
-			else if(usartConfig->parity == USART_PARITY_ODD)/*ODD*/
-			{
-				USART6->CR1 |= (1 << 9);
-			}
-		}
-		/*Set Oversampling Flag OVER8*/
-		if(usartConfig->oversampling == 8)
-		{
-			USART6->CR1 |= USARTx_CR1_OVER8;
-			Over8Val =1;
-		}
-		else if(usartConfig->oversampling == 16)
-		{
-			USART6->CR1 &= ~USARTx_CR1_OVER8;
-			Over8Val =0;
-		}
-
-		/*Set the Baud rate*/
-		//USARTDIV = FClk / ( 8 x ( 2 - OVER8) x BaudRate)
-		UsartDiv = (USART_PeripheralClockFreq / (8 * (2 - Over8Val) * usartConfig->baudrate));
-		Mantissa = (uint32_t)UsartDiv;
-		fraction = UsartDiv - Mantissa;
-
-		if(Over8Val == 1)
-		{
-			USART6->BRR = (Mantissa << 4) | (uint8_t)(fraction * 8 + 0.5f);
-		}
-		else /*Oversampling by 16*/
-		{
-			USART6->BRR = (Mantissa << 4) | (uint8_t)(fraction * 16 + 0.5f);
-		}
-
-		/*Enable Transmitter/Receiver*/
-		/*Enable USART*/
-		USART6->CR1 |= (USARTx_CR1_TE) | (USARTx_CR1_RE) | (USARTx_CR1_UE);
+		pUsart->CR1 &= ~(1 << 12);
 	}
 	else
 	{
+		pUsart->CR1 |= (1<<12); //9bits word length
+	}
+	/*Set the Stop bits*/
+	pUsart->CR2 &= ~(0b11 << 12);
+	if(usartConfig->stopBits == USART_STOPBITS_0_5)
+		pUsart->CR2 |=  USARTx_CR2_STOPBIT0_5;
+	else if(usartConfig->stopBits == USART_STOPBITS_1)
+		pUsart->CR2 |=  USARTx_CR2_STOPBIT1;
+	else if(usartConfig->stopBits == USART_STOPBITS_1_5)
+		pUsart->CR2 |=  USARTx_CR2_STOPBIT1_5;
+	else if(usartConfig->stopBits == USART_STOPBITS_2)
+		pUsart->CR2 |=  USARTx_CR2_STOPBIT2;
 
+
+	/*Enable or Disable Parity*/
+	if(usartConfig->parity != USART_PARITY_NONE)
+	{
+		/*Enable Parity*/
+		pUsart->CR1 |= (1 << 10);
+
+		/*Set the Parity*/
+		pUsart->CR1 &= ~(1 << 9);
+		if(usartConfig->parity == USART_PARITY_EVEN)
+		{
+			pUsart->CR1 &= ~(1 << 9);
+		}
+		else if(usartConfig->parity == USART_PARITY_ODD)/*ODD*/
+		{
+			pUsart->CR1 |= (1 << 9);
+		}
 	}
 
+	/*Set Oversampling Flag OVER8*/
+	if(usartConfig->oversampling == 8)
+	{
+		pUsart->CR1 |= USARTx_CR1_OVER8;
+		Over8Val =1;
+	}
+	else if(usartConfig->oversampling == 16)
+	{
+		pUsart->CR1 &= ~USARTx_CR1_OVER8;
+		Over8Val =0;
+	}
+
+	/*Set the Baud rate*/
+	//USARTDIV = FClk / ( 8 x ( 2 - OVER8) x BaudRate)
+	UsartDiv = (USART_PeripheralClockFreq / (8 * (2 - Over8Val) * usartConfig->baudrate));
+	Mantissa = (uint32_t)UsartDiv;
+	fraction = UsartDiv - Mantissa;
+
+	if(Over8Val == 1)
+	{
+		pUsart->BRR = (Mantissa << 4) | (uint8_t)(fraction * 8 + 0.5f);
+	}
+	else /*Oversampling by 16*/
+	{
+		pUsart->BRR = (Mantissa << 4) | (uint8_t)(fraction * 16 + 0.5f);
+	}
+
+	/*Enable Transmitter/Receiver*/
+	/*Enable USART*/
+	pUsart->CR1 |= (USARTx_CR1_TE) | (USARTx_CR1_RE) | (USARTx_CR1_UE);
 }
 
 /*This function DeInitializes the USART peripheral based on the USART ID passed as a param*/
-void USART_DeInit(USART_EN_ID_T usartId)
+void USART_DeInit(USART_Struct_T *usartConfig)
 {
-	if(usartId == USART1_ID)
+	if(usartConfig->usartID == USART1_ID)
 	{
-		/*Disable USART1 through CR1 Register*/
-		USART1->CR1 &= ~(USARTx_CR1_UE);
-
 		/*Disable USART1 Peripheral Clock through APB RCC Register */
 		RCC->APB2ENR &= ~( 1 << 4);
 	}
-	else if(usartId == USART2_ID)
+	else if(usartConfig->usartID == USART2_ID)
 	{
-		/*Disable USART2 through CR1 Register*/
-		USART2->CR1 &= ~(USARTx_CR1_UE);
-
 		/*Disable USART1 Peripheral Clock through APB RCC Register */
 		RCC->APB1ENR &= ~( 1 << 17);
 	}
-	else if(usartId == USART6_ID)
+	else if(usartConfig->usartID == USART6_ID)
 	{
-		/*Disable USART2 through CR1 Register*/
-		USART6->CR1 &= ~(USARTx_CR1_UE);
-
 		/*Disable USART1 Peripheral Clock through APB RCC Register */
 		RCC->APB2ENR &= ~( 1 << 5);
 	}
+	/*Disable USART1 through CR1 Register*/
+	usartConfig->USARTInstance->CR1 &= ~(USARTx_CR1_UE);
 }
 
 /*This function transmits the data of length passed as param*/
-void USART_Transmit(USART_EN_ID_T usartId, uint8_t *data, uint8_t length)
+void USART_Transmit(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length)
 {
-	if(usartId == USART1_ID)
+	USART_RegDef_T *pUsart;
+	pUsart = usartConfig->USARTInstance;
+
+	if(!usartConfig || !pUsart || !data || !length)
+		return;
+
+	for (uint32_t i=0; i<length; i++ )
 	{
-		for (uint32_t i=0; i<length; i++ )
-		{
-			while (!(USART1->SR & USARTx_SR_TXE));
+		while (!(pUsart->SR & USARTx_SR_TXE));
 
-			//Transmit the data
-			USART1->DR = data[i] & 0xff;
-		}
-		//Check the TC Flag
-		while (!(USART1->SR & USARTx_SR_TC));
+		//Transmit the data
+		pUsart->DR = data[i] & 0xff;
 	}
+	//Check the TC Flag
+	while (!(pUsart->SR & USARTx_SR_TC));
+}
 
-	else if(usartId == USART2_ID)
-	{
-		for (uint32_t i=0; i<length; i++ )
-		{
-			while (!(USART2->SR & USARTx_SR_TXE));
 
-			//Transmit the data
-			USART2->DR = data[i] & 0xff;
-		}
-		//Check the TC Flag
-		while(!(USART2->SR & USARTx_SR_TC));
-	}
-	else if(usartId == USART6_ID)
-	{
-		for (uint32_t i=0; i<length; i++ )
-		{
-			while(!(USART6->SR & USARTx_SR_TXE));
+/*This function prepares the global buffers to transmit data in Interrupt mode*/
+void USART_Transmit_IT(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length)
+{
+	if((usartConfig->TxBusy == 1) || length == 0)
+		return;
 
-			//Transmit the data
-			USART6->DR = data[i] & 0xff;
-		}
-		//Check the TC Flag
-		while (!(USART6->SR & USARTx_SR_TC));
-	}
+	usartConfig->pTxBuffer = data;
+	usartConfig->TxLength = length;
+	usartConfig->TxIndex = 0;
+	usartConfig->TxBusy = 1;
 
+	usartConfig->USARTInstance->CR1 |= USARTx_CR1_TXEIE;
 }
 
 /*This function receives the data through the data buffer of length passed as param*/
-void USART_Receive(USART_EN_ID_T usartId, uint8_t *data, uint8_t length)
+void USART_Receive(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length)
 {
-	if(usartId == USART1_ID)
-	{
-		for (uint32_t i=0; i< length; i++)
-		{
-			//Check the RXNE Flag in SR
-			while(!(USART1->SR & USARTx_SR_RXNE));
+	USART_RegDef_T *pUsart;
+	pUsart = usartConfig->USARTInstance;
 
-			//Read the DR
-			data[i] = USART1->DR & 0xFF;
-		}
-	}
-	else if(usartId == USART2_ID)
-	{
-		for (uint32_t i=0; i< length; i++)
-		{
-			//Check the RXNE Flag in SR
-			while(!(USART2->SR & USARTx_SR_RXNE));
+	if(!usartConfig || !pUsart || !data || !length)
+		return;
 
-			//Read the DR
-			data[i] = USART2->DR & 0xFF;
-		}
-	}
-	else if(usartId == USART6_ID)
+	for (uint32_t i=0; i< length; i++)
 	{
-		for (uint32_t i=0; i< length; i++)
-		{
-			//Check the RXNE Flag in SR
-			while(!(USART6->SR & USARTx_SR_RXNE));
+		//Check the RXNE Flag in SR
+		while(!(pUsart->SR & USARTx_SR_RXNE));
 
-			//Read the DR
-			data[i] = USART6->DR & 0xFF;
-		}
+		//Read the DR
+		data[i] = pUsart->DR & 0xFF;
 	}
+}
+
+/*Setup the buffers to receive data in Interrupt mode*/
+void USART_Receive_IT(USART_Struct_T *usartConfig, uint8_t *data, uint8_t length)
+{
+	if((usartConfig->RxBusy == 1) || length == 0)
+			return;
+
+	usartConfig->pRxBuffer = data;
+	usartConfig->RxLength = length;
+	usartConfig->RxIndex = 0;
+	usartConfig->RxBusy = 1;
+
+	usartConfig->USARTInstance->CR1 |= USARTx_CR1RXNEIE;
 }
 
 /* This function enables the USART for given USART Peripheral ID*/
-void USART_Enable(USART_EN_ID_T usartId)
+void USART_Enable(USART_Struct_T *usartConfig)
 {
-	if(usartId == USART1_ID)
-	{
-		USART1->CR1 |= USARTx_CR1_UE;
-	}
-	else if (usartId == USART2_ID)
-	{
-		USART2->CR1 |= USARTx_CR1_UE;
-	}
-	else if (usartId == USART6_ID)
-	{
-		USART6->CR1 |= USARTx_CR1_UE;
-	}
+	USART_RegDef_T *pUsart;
+	pUsart = usartConfig->USARTInstance;
+
+	if(!usartConfig || !pUsart )
+		return;
+
+	pUsart->CR1 |= USARTx_CR1_UE;
+
 }
 
 /* This function disables the USART for given USART Peripheral ID*/
-void USART_Disable(USART_EN_ID_T usartId)
+void USART_Disable(USART_Struct_T *usartConfig)
 {
-	if(usartId == USART1_ID)
-	{
-		USART1->CR1 &= ~USARTx_CR1_UE;
-	}
-	else if (usartId == USART2_ID)
-	{
-		USART2->CR1 &= ~USARTx_CR1_UE;
-	}
-	else if (usartId == USART6_ID)
-	{
-		USART6->CR1 &= ~USARTx_CR1_UE;
-	}
+	USART_RegDef_T *pUsart;
+	pUsart = usartConfig->USARTInstance;
+
+	if(!usartConfig || !pUsart )
+		return;
+
+	pUsart->CR1 &= ~USARTx_CR1_UE;
 }
 
 /*This function configures the GPIO peripheral for the given USART ID*/
@@ -449,3 +283,6 @@ void USART_ConfigureGPIO(USART_EN_ID_T usartId)
 
 	}
 }
+
+
+
