@@ -23,6 +23,7 @@
 #include "EXTI_Driver.h"
 #include "NVIC_Driver.h"
 #include "USART_Driver.h"
+#include "GPS_Driver.h"
 
 /*This RXBuff is used in USARTDemo Part19*/
 uint8_t RxBuff[10];
@@ -46,6 +47,18 @@ GPIO_PINCONFIG_T PushButton =
 		.pupdr=GPIO_NO_PULL,
 		.alternatefunc=0
 };
+
+USART_Struct_T Usart1Struct =
+{
+		.baudrate = 9600,
+		.oversampling = 8,
+		.parity = USART_PARITY_NONE,
+		.stopBits = USART_STOPBITS_1,
+		.usartID = USART1_ID,
+		.wordLength = USART_WORDLENGTH_8B,
+		.USARTInstance = USART1
+};
+
 
 USART_Struct_T Usart2Struct =
 {
@@ -133,6 +146,38 @@ void Part20_UARTDemo(void)
 	}
 }
 
+
+
+void Part21_UARTDemo(void)
+{
+	const char *message = "Hello from USART1!\n";
+	//Enable FPU
+	SCB_CPACR_ADDR |= (0xF << 20);
+
+	//Enable the HSE Clock (8MHz) and configure the USART Peripheral Clock (APB Clock) also to 8MHz
+	RCC_Config_HSE_SystemClock();
+
+	USART_Init(&Usart1Struct);
+	USART_Init(&Usart2Struct);
+
+	//Enable NVIC Module USART1 & USART2 Interrupt
+	NVIC_EnableIRQ(USART1_IRQn);
+	NVIC_EnableIRQ(USART2_IRQn);
+
+
+	USART_Transmit_IT(&Usart1Struct, (uint8_t*)message, 19);
+	USART_Receive_IT(&Usart2Struct, (uint8_t*)RxBuff, 1);
+
+	while(1)
+	{
+		if(Usart2Struct.RxBusy == 0)
+		{
+			GPS_ProcessRxByte(RxBuff[0]);
+			USART_Receive_IT(&Usart2Struct, (uint8_t*)RxBuff, 1);
+		}
+	}
+}
+
 int main(void)
 {
 	/*Uncomment to execute Interrupt Demo*/
@@ -141,7 +186,10 @@ int main(void)
 	/*Uncomment to execute UART Demo for Part19*/
 	//Part19_UARTDemo();
 
-	Part20_UARTDemo();
+	/*Uncomment to execute UART Demo for Part20*/
+	//Part20_UARTDemo();
+
+	Part21_UARTDemo();
 }
 
 
@@ -153,6 +201,37 @@ void EXTI0_IRQHandler()
 		GPIO_TogglePin(GPIOD, 14);
 		EXTI_ClearPending(0);
 	}
+}
+
+void USART1_IRQHandler()
+{
+	//Transmit the data in Interrupt mode
+	if((Usart1Struct.USARTInstance->SR & USARTx_SR_TXE) &&
+	   (Usart1Struct.USARTInstance->CR1 & USARTx_CR1_TXEIE))
+	{
+		if(Usart1Struct.TxIndex < Usart1Struct.TxLength)
+			Usart1Struct.USARTInstance->DR = Usart1Struct.pTxBuffer[Usart1Struct.TxIndex++];
+		else
+		{
+			Usart1Struct.USARTInstance->CR1 &= ~(USARTx_CR1_TXEIE);
+			Usart1Struct.TxBusy =0;
+		}
+	}
+
+	//Receive the data in Interrupt mode
+	if((Usart1Struct.USARTInstance->SR & USARTx_SR_RXNE) &&
+	   (Usart1Struct.USARTInstance->CR1 & USARTx_CR1RXNEIE))
+	{
+		Usart1Struct.pRxBuffer[Usart1Struct.RxIndex++] = Usart1Struct.USARTInstance->DR & 0xFF;
+
+		if(Usart1Struct.RxIndex >= Usart1Struct.RxLength)
+		{
+			Usart1Struct.USARTInstance->CR1 &= ~(USARTx_CR1RXNEIE);
+			Usart1Struct.RxBusy = 0;
+		}
+
+	}
+
 }
 
 void USART2_IRQHandler()
