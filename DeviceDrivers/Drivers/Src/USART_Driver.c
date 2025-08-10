@@ -245,13 +245,15 @@ void USART_ConfigureGPIO(USART_EN_ID_T usartId)
 	if(usartId == USART1_ID)
 	{
 		RCC_EnableGPIO(GPIOA);
-		/* PA9-Tx and PA10-Rx; AF - 7  */
-		GpioUsartPinConfig.pin = 9;
+		RCC_EnableGPIO(GPIOB);
+		/* PA15-Tx */
+		GpioUsartPinConfig.pin = 15;
 		GpioUsartPinConfig.alternatefunc = 7;
 		GPIO_Init(GPIOA, &GpioUsartPinConfig);
 
-		GpioUsartPinConfig.pin = 10;
-		GPIO_Init(GPIOA, &GpioUsartPinConfig);
+		/* PB7-Rx */
+		GpioUsartPinConfig.pin = 7;
+		GPIO_Init(GPIOB, &GpioUsartPinConfig);
 
 	}
 	/*Configure the GPIO for USART2*/
